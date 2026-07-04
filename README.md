@@ -66,7 +66,6 @@ To compile and optimize the assets for live hosting platforms (Netlify, Vercel, 
    ```bash
    npm run build
    ```
-The compiled output will be generated inside the `dist/` directory, ready to be deployed.
 ---
 ## 📂 Codebase Overview
 ### Project Directory Structure
