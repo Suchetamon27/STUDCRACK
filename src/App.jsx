@@ -312,6 +312,222 @@ export default function App() {
             library: [],
             transactions: [],
             notifications: [
+ { id: "welcome", title: "Welcome to Studcrack! 🎓", content: "You've successfully launched the platform. Complete tasks, answer quizzes, and refer friends to earn EMD!", read: false, timestamp: Date.now() }
+            ],
+            completedQuizzes: [],
+            followingUids: [],
+            purchasedContent: []
+          };
+          setDoc(userRef, initialProfile);
+        }
+      });
+      // Public Profiles listener
+      const unsubProfiles = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'profiles'), (snap) => {
+        setAllProfiles(snap.docs.map(d => d.data()));
+      });
+      // Public Notes listener
+      const unsubNotes = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'notes'), (snap) => {
+        setNotes(snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => b.timestamp - a.timestamp));
+        setDataReady(true);
+      });
+      // Sync public presence
+      if (userData) {
+        setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'profiles', user.uid), {
+          uid: user.uid, username: userData.username, balance: userData.balance,
+          referrals: userData.referrals, avatarSeed: userData.avatarSeed, displayName: userData.displayName
+        }, { merge: true });
+      }
+      return () => { unsubUser(); unsubProfiles(); unsubNotes(); };
+    }
+  }, [user, userData?.username, dataReady]);
+  // --- SPLASH CONTROLLER ---
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSplashProgress(prev => (prev < 100 ? prev + 4 : 100));
+    }, 40);
+    if (splashProgress >= 100 && dataReady) {
+      setTimeout(() => setShowSplash(false), 400);
+    }
+    return () => clearInterval(timer);
+  }, [splashProgress, dataReady]);
+  // --- DAILY STREAK MECHANICS ---
+  useEffect(() => {
+    if (!userData || !user) return;
+    const now = Date.now();
+    const lastActive = userData.lastActive || now;
+    const diffTime = now - lastActive;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 1) {
+      const newStreak = (userData.streak || 0) + 1;
+      const reward = 10 * newStreak;
+      updateProfile({
+        streak: newStreak,
+        lastActive: now,
+        balance: increment(reward)
+      });
+      addNotification("Streak Active! 🔥", `You maintained your streak for ${newStreak} days! Added ${reward} EMD bonus.`);
+    } else if (diffDays > 1) {
+      updateProfile({
+        streak: 1,
+        lastActive: now
+      });
+      addNotification("Streak Reset ⏳", "It's been more than 24 hours since your last session. Your streak reset to 1 day.");
+    } else {
+      if (!userData.lastActive) {
+        updateProfile({ lastActive: now });
+      }
+    }
+  }, [user, userData?.streak]);
+  // --- GENERAL ACTIONS WRAPPERS ---
+  const notify = (msg) => { setNotification(msg); setTimeout(() => setNotification(null), 3000); };
+  
+  const handleCopy = (text) => {
+    const el = document.createElement('textarea'); el.value = text; document.body.appendChild(el); el.select();
+    document.execCommand('copy'); document.body.removeChild(el); notify("Copied!");
+  };
+  const updateProfile = async (fields) => {
+    if (!user || !userData) return;
+    const updated = { ...userData };
+    Object.keys(fields).forEach(key => {
+      const val = fields[key];
+      if (val && typeof val === 'object' && val.operand !== undefined) {
+        updated[key] = (updated[key] || 0) + val.operand;
+      } else {
+        updated[key] = val;
+      }
+    });
+    if (isFirebaseFallback) {
+      setUserData(updated);
+      localStorage.setItem(`studcrack_user_${user.uid}`, JSON.stringify(updated));
+      
+      if (updated.username) {
+        const publicProfiles = JSON.parse(localStorage.getItem('studcrack_public_profiles') || '[]');
+        const idx = publicProfiles.findIndex(p => p.uid === user.uid);
+        const pObj = {
+          uid: user.uid, username: updated.username, balance: updated.balance,
+          referrals: updated.referrals, avatarSeed: updated.avatarSeed, displayName: updated.displayName
+        };
+        if (idx > -1) publicProfiles[idx] = pObj;
+        else publicProfiles.push(pObj);
+        localStorage.setItem('studcrack_public_profiles', JSON.stringify(publicProfiles));
+        setAllProfiles(publicProfiles);
+      }
+    } else {
+      try {
+        await updateDoc(doc(db, 'artifacts', appId, 'users', user.uid), fields);
+      } catch (err) { console.error("Firestore sync fail", err); }
+    }
+  };
+  const addNotification = (title, content) => {
+    if (!userData) return;
+    const newNotif = {
+      id: `notif_${Date.now()}_${Math.random().toString(36).substring(5)}`,
+      title,
+      content,
+      read: false,
+      timestamp: Date.now()
+    };
+    updateProfile({
+      notifications: [newNotif, ...(userData.notifications || [])]
+    });
+  };
+  const handleSpin = async () => {
+    if (isSpinning || !user) return;
+    setIsSpinning(true);
+    const prizeIndex = Math.floor(Math.random() * WHEEL_PRIZES.length);
+    const rotation = (10 * 360) + (WHEEL_PRIZES.length - prizeIndex) * (360 / WHEEL_PRIZES.length);
+    setSpinRotation(prev => prev + rotation);
+    setTimeout(async () => {
+      const prize = WHEEL_PRIZES[prizeIndex];
+      await updateProfile({ balance: increment(prize.emd) });
+      setIsSpinning(false); 
+      notify(`Landed on ${prize.emd} Emeralds!`);
+      addNotification("Lucky Wheel Reward 🎡", `You spun the wheel and landed on ${prize.label}!`);
+    }, 4000);
+  };
+  const handleWatchAd = () => {
+    if (adTimer > 0) return;
+    setModals(p => ({...p, ad: true}));
+    let left = 10; setAdTimer(left);
+    const timer = setInterval(() => {
+      left -= 1; setAdTimer(left);
+      if (left <= 0) {
+        clearInterval(timer); setModals(p => ({...p, ad: false}));
+        updateProfile({ balance: increment(25) });
+        notify("Earned 25 Emeralds!");
+        addNotification("Ad Reward Credited 📺", "You watched an ad study-break and earned 25 EMD.");
+      }
+    }, 1000);
+  };
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    const titleVal = e.target.title.value;
+    const examVal = e.target.exam.value;
+    
+    const newNote = {
+      title: titleVal, exam: examVal, authorName: userData.displayName, authorId: user.uid,
+      views: 0, likes: 0, timestamp: Date.now(), image: `https://picsum.photos/seed/${Math.random().toString(36).substring(7)}/600/400`, type: 'NOTE'
+    };
+    if (isFirebaseFallback) {
+      newNote.id = `local_note_${Date.now()}`;
+      const localNotes = [newNote, ...notes];
+      localStorage.setItem('studcrack_public_notes', JSON.stringify(localNotes));
+      setNotes(localNotes);
+      setModals(p => ({...p, upload: false})); 
+      notify("Published locally!");
+    } else {
+      try {
+        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'notes'), newNote);
+        setModals(p => ({...p, upload: false})); 
+        notify("Published!");
+      } catch(err) { notify("Error."); }
+    }
+  };
+  const handleCopyNoteLink = (note) => {
+    handleCopy(`${window.location.origin}/?note=${note.id}`);
+  };
+  const toggleFollowUser = (authorId, authorName) => {
+    if (!userData || authorId === user.uid) return;
+    const currentFollowing = userData.followingUids || [];
+    let updated;
+    let isFollowing = currentFollowing.includes(authorId);
+    if (isFollowing) {
+      updated = currentFollowing.filter(id => id !== authorId);
+      updateProfile({
+        following: increment(-1),
+        followingUids: updated
+      });
+      notify(`Unfollowed @${authorName}`);
+    } else {
+      updated = [...currentFollowing, authorId];
+      updateProfile({
+        following: increment(1),
+        followingUids: updated
+      });
+      notify(`Following @${authorName}`);
+      addNotification("New Connection 🤝", `You are now following @${authorName} and will see their notes in your Feed.`);
+    }
+  };
+  // Content Selection triggers (Premium content locking checker)
+  const handleSelectNote = (note) => {
+    const isOwned = note.authorId === user.uid || userData?.purchasedContent?.includes(note.id);
+    if (note.isPremium && !isOwned) {
+      setPurchaseItem(note);
+      setModals(p => ({ ...p, purchaseContent: true }));
+    } else {
+      setModals(p => ({ ...p, viewNote: note }));
+    }
+  };
+  const handleSelectCourse = (course) => {
+    const isOwned = userData?.purchasedContent?.includes(course.id);
+    if (course.isPremium && !isOwned) {
+      setPurchaseItem({ ...course, type: 'COURSE' });
+      setModals(p => ({ ...p, purchaseContent: true }));
+    } else {
+      notify(`Accessing course lectures for "${course.title}"`);
+    }
+  };
 
 
 
