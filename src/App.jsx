@@ -1810,6 +1810,30 @@ return (
                   className="w-full p-4 bg-gray-50 rounded-2xl outline-none font-bold text-xs uppercase text-center border border-gray-100 tracking-widest"
                 />
               </div>
+             <button 
+                type="submit"
+                disabled={isVerifyingUpi}
+                className={`w-full py-4 rounded-2xl font-bold text-xs uppercase tracking-widest flex items-center justify-center space-x-2 text-white transition-all shadow-md ${isVerifyingUpi ? 'bg-gray-300 cursor-default shadow-none' : 'bg-blue-600 hover:bg-blue-700 shadow-blue-100'}`}
+              >
+                {isVerifyingUpi ? (
+                  <>
+                    <RotateCw className="animate-spin" size={14} />
+                    <span>Verifying Transfer...</span>
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck size={14} />
+                    <span>Verify & Confirm Payment</span>
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
 
 
 
