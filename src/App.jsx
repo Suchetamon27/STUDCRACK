@@ -1771,7 +1771,45 @@ return (
                 <X />
               </button>
             </div>
-
+           <div className="text-center space-y-4">
+              <div>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Amount to Pay</p>
+                <h2 className="text-4xl font-extrabold text-gray-900 mt-1">₹{upiPaymentDetail.amount}.00</h2>
+                {upiPaymentDetail.type === 'topup' && (
+                  <p className="text-[9px] text-green-500 font-black uppercase tracking-wide mt-1">Crediting +{upiPaymentDetail.emdReward} EMD</p>
+                )}
+                {upiPaymentDetail.type === 'content' && (
+                  <p className="text-[9px] text-amber-500 font-black uppercase tracking-wide mt-1">Unlocking: {upiPaymentDetail.item.title}</p>
+                )}
+              </div>
+              {/* Real dynamic UPI QR Code */}
+              <div className="w-48 h-48 bg-white border border-gray-100 rounded-3xl mx-auto flex items-center justify-center p-2 shadow-inner">
+                <img 
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
+                    `upi://pay?pa=studcrack@upi&pn=Studcrack&am=${upiPaymentDetail.amount}.00&cu=INR&tn=${upiPaymentDetail.type === 'topup' ? 'EMD_Topup' : 'Unlock_Content'}`
+                  )}`} 
+                  alt="UPI QR Code" 
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <div className="space-y-1">
+                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none">Scan with GPay, PhonePe or Paytm</p>
+                <p className="text-[8px] text-gray-300 font-bold uppercase">Merchant ID: studcrack@upi</p>
+              </div>
+            </div>
+            <hr className="border-gray-50" />
+            <form onSubmit={handleUpiVerificationSubmit} className="space-y-4">
+              <div>
+                <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest px-1 block mb-1">Enter 12-Digit UTR / UPI Ref No.</label>
+                <input 
+                  name="utr" 
+                  required 
+                  placeholder="e.g. 627192837482" 
+                  pattern="\d{12}"
+                  title="UTR must be exactly 12 numeric digits"
+                  className="w-full p-4 bg-gray-50 rounded-2xl outline-none font-bold text-xs uppercase text-center border border-gray-100 tracking-widest"
+                />
+              </div>
 
 
 
