@@ -89,10 +89,15 @@ STUDCRACK/
 - [src/index.css](src/index.css): Global classes and Tailwind directives.
 - [src/App.jsx](src/App.jsx): Primary state controller, layout shell, and component views.
 ---
+### 🤝 Contributing
+We welcome contributions!
 
-
-
-
+- Fork the project.
+- Create your feature branch (git checkout -b feature/amazing-feature).
+- Commit your changes (git commit -m 'Add some amazing feature').
+- Push to the branch (git push origin feature/amazing-feature).
+- Open a Pull Request.
+---
 
 ### 📊 Project 
 Made with ❤️ for students worldwide ⭐ Star us on GitHub — it motivates us a lot!
