@@ -141,12 +141,21 @@ let app, auth, db;
 let isFirebaseFallback = false;
 let appId = 'studcrack-prod-v3';
 try {
-  if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-    const config = JSON.parse(__firebase_config);
+ 
+ const firebaseConfigStr = typeof window !== 'undefined' ? window.__firebase_config : undefined;
+  if (firebaseConfigStr) {
+    const config = JSON.parse(firebaseConfigStr);
+
+
     app = initializeApp(config);
     auth = getAuth(app);
     db = getFirestore(app);
-    if (typeof __app_id !== 'undefined') appId = __app_id;
+
+
+      const globalAppId = typeof window !== 'undefined' ? window.__app_id : undefined;
+    if (globalAppId) appId = globalAppId;
+
+
   } else {
     throw new Error("No config injected");
   }
