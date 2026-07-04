@@ -216,8 +216,13 @@ export default function App() {
     } else {
       const initAuth = async () => {
         try {
-          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-            await signInWithCustomToken(auth, __initial_auth_token);
+
+
+                  const token = typeof window !== 'undefined' ? window.__initial_auth_token : undefined;
+          if (token) {
+            await signInWithCustomToken(auth, token);
+
+
           } else {
             await signInAnonymously(auth);
           }
