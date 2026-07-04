@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { initializeApp } from 'firebase/app';
 import { 
-  getFirestore, collection, doc, setDoc, addDoc, 
+   getFirestore, collection, doc, setDoc, addDoc, getDoc, 
   onSnapshot, updateDoc, increment 
 } from 'firebase/firestore';
 import { 
@@ -163,7 +163,46 @@ try {
   console.warn("Firebase config not found. Falling back to LocalStorage mode.");
   isFirebaseFallback = true;
 }
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error("ErrorBoundary caught error:", error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '20px', fontFamily: 'sans-serif', backgroundColor: '#fff5f5', color: '#c53030', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: '900', margin: '0 0 10px 0', textTransform: 'uppercase' }}>System Error</h1>
+          <p style={{ margin: '0 0 20px 0', fontSize: '14px', color: '#9b2c2c' }}>Studcrack encountered a runtime error:</p>
+          <pre style={{ backgroundColor: '#1a202c', color: '#68d391', padding: '20px', borderRadius: '16px', overflowX: 'auto', maxWidth: '95%', fontSize: '11px', textAlign: 'left', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+            {this.state.error?.stack || String(this.state.error)}
+          </pre>
+          <button onClick={() => { localStorage.clear(); window.location.reload(); }} style={{ marginTop: '20px', padding: '12px 24px', backgroundColor: '#e53e3e', color: '#fff', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            Reset App Cache & Reload
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function App() {
+ return (
+    <ErrorBoundary>
+      <StudcrackApp />
+    </ErrorBoundary>
+  );
+}
+function StudcrackApp() {
+
   // Initialization Lifecycle
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
@@ -195,6 +234,8 @@ export default function App() {
   const [purchaseItem, setPurchaseItem] = useState(null);
   const [upiPaymentDetail, setUpiPaymentDetail] = useState(null); // { type: 'content' | 'topup', item, amount, emdReward }
   const [isVerifyingUpi, setIsVerifyingUpi] = useState(false);
+ const [isFallback, setIsFallback] = useState(isFirebaseFallback);
+
  // Modals
   const [modals, setModals] = useState({
     upload: false, ad: false, withdraw: false, viewNote: null,
@@ -219,32 +260,32 @@ export default function App() {
 
 
                   const token = typeof window !== 'undefined' ? window.__initial_auth_token : undefined;
-          if (token) {
+                   if (token && auth) {
             await signInWithCustomToken(auth, token);
-
+  } else if (auth) {
+            await signInAnonymously(auth);
 
           } else {
-            await signInAnonymously(auth);
+
+
+             throw new Error("Firebase auth not ready");
           }
         } catch (err) {
           console.error("Auth Failure, falling back:", err);
-          isFirebaseFallback = true;
-          let localUid = localStorage.getItem('studcrack_local_uid');
-          if (!localUid) {
-            localUid = `local_user_${Math.random().toString(36).substring(7)}`;
-            localStorage.setItem('studcrack_local_uid', localUid);
-          }
-          setUser({ uid: localUid, isAnonymous: true });
+                    isFirebaseFallback = true; // Sync global
+          setIsFallback(true);
         }
       };
       initAuth();
-      return onAuthStateChanged(auth, setUser);
+            if (auth) {
+        return onAuthStateChanged(auth, setUser);
+            }
     }
-  }, []);
+  }, [isFallback]);
   // --- DATA SYNC ---
   useEffect(() => {
     if (!user) return;
-    if (isFirebaseFallback) {
+          if (isFallback) {
       const localKey = `studcrack_user_${user.uid}`;
       let localUser = JSON.parse(localStorage.getItem(localKey));
       if (!localUser) {
@@ -299,61 +340,42 @@ export default function App() {
       setNotes(localNotes);
       setDataReady(true);
     } else {
-      // Private Profile live firestore listener
-      const userRef = doc(db, 'artifacts', appId, 'users', user.uid);
-      const unsubUser = onSnapshot(userRef, (snap) => {
-        if (snap.exists()) {
-          setUserData(snap.data());
-        } else {
-          const initialProfile = {
-            uid: user.uid,
-            username: `user_${user.uid.slice(0, 5)}`,
-            displayName: "Active Learner",
-            balance: 150,
-            referrals: 0,
-            streak: 1,
-            lastActive: Date.now(),
-            exams: ["WBJEE", "GATE"],
-            colleges: ["NSEC"],
-            followers: 5,
-            following: 12,
-            profileColor: 'from-blue-600 via-blue-400 to-blue-50',
-            avatarSeed: user.uid,
-            isPremium: false,
-            joinedAt: Date.now(),
-            notebook: [],
-            planner: [],
-            library: [],
-            transactions: [],
-            notifications: [
- { id: "welcome", title: "Welcome to Studcrack! 🎓", content: "You've successfully launched the platform. Complete tasks, answer quizzes, and refer friends to earn EMD!", read: false, timestamp: Date.now() }
-            ],
-            completedQuizzes: [],
-            followingUids: [],
-            purchasedContent: []
-          };
-          setDoc(userRef, initialProfile);
+     
+    if (isFallback) {
+
+
+
+// Public Profiles listener
+        const unsubProfiles = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'profiles'), (snap) => {
+          setAllProfiles(snap.docs.map(d => d.data()));
+        }, (err) => {
+          console.warn("Profiles sync failed, falling back:", err);
+          setIsFallback(true);
+        });
+
+ // Public Notes listener
+        const unsubNotes = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'notes'), (snap) => {
+          setNotes(snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => b.timestamp - a.timestamp));
+          setDataReady(true);
+        }, (err) => {
+          console.warn("Notes sync failed, falling back:", err);
+          setIsFallback(true);
+        });
+
+// Sync public presence
+        if (userData) {
+          setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'profiles', user.uid), {
+            uid: user.uid, username: userData.username, balance: userData.balance,
+            referrals: userData.referrals, avatarSeed: userData.avatarSeed, displayName: userData.displayName
+          }, { merge: true });
         }
-      });
-      // Public Profiles listener
-      const unsubProfiles = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'profiles'), (snap) => {
-        setAllProfiles(snap.docs.map(d => d.data()));
-      });
-      // Public Notes listener
-      const unsubNotes = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'notes'), (snap) => {
-        setNotes(snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => b.timestamp - a.timestamp));
-        setDataReady(true);
-      });
-      // Sync public presence
-      if (userData) {
-        setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'profiles', user.uid), {
-          uid: user.uid, username: userData.username, balance: userData.balance,
-          referrals: userData.referrals, avatarSeed: userData.avatarSeed, displayName: userData.displayName
-        }, { merge: true });
-      }
-      return () => { unsubUser(); unsubProfiles(); unsubNotes(); };
+        return () => { unsubUser(); unsubProfiles(); unsubNotes(); };
+      } catch (err) {
+        console.warn("Firebase snapshot attachment failed, falling back:", err);
+        setIsFallback(true);
+          }
     }
-  }, [user, userData?.username, dataReady]);
+   }, [user, userData?.username, dataReady, isFallback]);
   // --- SPLASH CONTROLLER ---
   useEffect(() => {
     const timer = setInterval(() => {
@@ -411,7 +433,7 @@ export default function App() {
         updated[key] = val;
       }
     });
-    if (isFirebaseFallback) {
+    if (isFallback) {
       setUserData(updated);
       localStorage.setItem(`studcrack_user_${user.uid}`, JSON.stringify(updated));
       
@@ -483,7 +505,7 @@ export default function App() {
       title: titleVal, exam: examVal, authorName: userData.displayName, authorId: user.uid,
       views: 0, likes: 0, timestamp: Date.now(), image: `https://picsum.photos/seed/${Math.random().toString(36).substring(7)}/600/400`, type: 'NOTE'
     };
-    if (isFirebaseFallback) {
+       if (isFallback) {
       newNote.id = `local_note_${Date.now()}`;
       const localNotes = [newNote, ...notes];
       localStorage.setItem('studcrack_public_notes', JSON.stringify(localNotes));
@@ -669,7 +691,7 @@ export default function App() {
         onCopy={handleCopy} onSpin={handleSpin} isSpinning={isSpinning} spinRotation={spinRotation} adTimer={adTimer} handleUpload={handleUpload}
         pushEnabled={pushEnabled} setPushEnabled={setPushEnabled} user={user} appId={appId} notify={notify}
         updateProfile={updateProfile} addNotification={addNotification} toggleFollowUser={toggleFollowUser} handleCopyNoteLink={handleCopyNoteLink}
-        isFirebaseFallback={isFirebaseFallback} allProfiles={allProfiles} setAllProfiles={setAllProfiles}
+        isFirebaseFallback={isFallback} allProfiles={allProfiles} setAllProfiles={setAllProfiles}
         quizScore={quizScore} setQuizScore={setQuizScore} activeQuiz={activeQuiz} setActiveQuiz={setActiveQuiz}
         quizQuestionIndex={quizQuestionIndex} setQuizQuestionIndex={setQuizQuestionIndex}
         quizSelectedOption={quizSelectedOption} setQuizSelectedOption={setQuizSelectedOption}
