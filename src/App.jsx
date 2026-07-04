@@ -1014,14 +1014,14 @@ const ModalSystem = ({
       } else {
         // Firebase live update - fetch current transactions list, update target tx to completed
         const userRef = doc(db, 'artifacts', appId, 'users', user.uid);
-        onSnapshot(userRef, (snap) => {
+        getDoc(userRef).then((snap) => {
           if (snap.exists()) {
             const data = snap.data();
             const txs = data.transactions || [];
             const updatedTxs = txs.map(t => t.id === newTxId ? { ...t, status: 'Completed' } : t);
             updateDoc(userRef, { transactions: updatedTxs });
           }
-        }, { once: true });
+       }).catch(err => console.error("Failed to complete transaction:", err));
       }
       addNotification("Withdrawal Successful 💰", `Redemption of ${amount} EMD has been successfully disbursed to UPI ${upi}.`);
     }, 15000);
