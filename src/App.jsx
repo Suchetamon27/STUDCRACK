@@ -1249,7 +1249,528 @@ const ModalSystem = ({
       }
     }, 2000);
   };
-
+return (
+    <>
+      {modals.settings && (
+        <ModalWrapper title="Settings">
+          <div className="p-6 space-y-10 pb-20">
+            <div><p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 px-1">General</p><div className="p-5 bg-white border border-gray-50 rounded-[28px] flex items-center justify-between shadow-sm"><div className="flex items-center space-x-4"><div className="p-3 bg-red-50 text-red-500 rounded-2xl font-black uppercase"><Bell size={22}/></div><span className="font-black text-sm uppercase tracking-tight">Push Alerts</span></div><button onClick={() => setPushEnabled(!pushEnabled)} className="transition-all scale-125">{pushEnabled ? <ToggleRight className="text-blue-500" size={32} /> : <ToggleLeft className="text-gray-200" size={32} />}</button></div></div>
+            <div><p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 px-1">Account</p><div className="bg-white border border-gray-50 rounded-[32px] overflow-hidden shadow-sm"><button onClick={() => setModals(p => ({...p, settings: false, editProfile: true}))} className="w-full p-5 flex items-center justify-between border-b border-gray-50 active:bg-gray-50"><div className="flex items-center space-x-4"><div className="p-2.5 bg-blue-50 text-blue-500 rounded-xl font-black uppercase"><UserCircle size={20}/></div><span className="font-black text-sm uppercase tracking-tight">Edit Profile</span></div><ChevronRight size={18} className="text-gray-200"/></button><button onClick={() => notify("Core Auth Protected")} className="w-full p-5 flex items-center justify-between active:bg-red-50 font-black uppercase"><div className="flex items-center space-x-4"><div className="p-2.5 bg-red-50 text-red-500 rounded-xl"><Trash size={20}/></div><span className="font-black text-sm uppercase tracking-tight">Delete Account</span></div><ChevronRight size={18} className="text-gray-200"/></button></div></div>
+            <div><p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 px-1">Community</p><div className="bg-white border border-gray-50 rounded-[32px] overflow-hidden shadow-sm">
+                {[ { label: "Request a Feature", icon: Lightbulb, color: "text-yellow-500 bg-yellow-50" }, { label: "Request a Material", icon: FileQuestion, color: "text-orange-500 bg-orange-50" }, { label: "Become a Campus Rep", icon: UserPlus, color: "text-blue-500 bg-blue-50" }, { label: "Contact Support", icon: Headphones, color: "text-red-500 bg-red-50" } ].map((item, i) => (
+                  <button key={i} onClick={() => notify(`${item.label} submitted!`)} className="w-full p-5 flex items-center justify-between border-b last:border-0 border-gray-50 active:bg-gray-50"><div className="flex items-center space-x-4"><div className={`p-2.5 ${item.color} rounded-xl font-black uppercase`}><item.icon size={20}/></div><span className="font-black text-sm uppercase tracking-tight">{item.label}</span></div><ChevronRight size={18} className="text-gray-200"/></button>
+                ))}
+            </div></div>
+            <div className="pt-4 text-center opacity-30 font-black"><p className="text-[10px] uppercase tracking-widest italic">Studcrack Cloud V3</p></div>
+            <button onClick={() => window.location.reload()} className="w-full py-5 bg-white border border-red-100 text-red-500 font-black text-xs uppercase tracking-[0.2em] rounded-[32px] shadow-sm active:scale-95 transition-all">Log Out Session</button>
+          </div>
+        </ModalWrapper>
+      )}
+      {modals.wallet && (
+        <ModalWrapper title="Wallet">
+           <div className="p-6 space-y-8 pb-10 overflow-y-auto no-scrollbar">
+              <div className="bg-gradient-to-br from-[#FFD700] via-[#FFB800] to-[#FFA500] p-8 rounded-[40px] text-white shadow-xl relative overflow-hidden animate-in zoom-in duration-500"><div className="relative z-10 space-y-3"><div className="flex items-center space-x-2 opacity-80"><Crown size={16}/><span className="text-[10px] font-black uppercase tracking-widest">STUDIVA PREMIUM</span></div><h2 className="text-2xl font-black italic leading-tight uppercase">Ad-Free<br/>Workspace</h2><button onClick={() => notify("Premium subscriptions available in next updates")} className="bg-white text-[#FFB800] px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest mt-2 shadow-lg active:scale-95 transition-all">Explore Now</button></div><Crown size={150} className="absolute -bottom-6 -right-6 opacity-10 rotate-12" /></div>
+              <div className="space-y-4"><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1 text-center">Total Worth</p><div className="bg-[#1D91FF] p-8 rounded-[48px] text-white shadow-2xl relative text-center"><p className="text-xs font-black opacity-80 uppercase tracking-[0.3em] mb-4">Emerald Balance</p><div className="flex items-baseline justify-center space-x-3 mb-6"><h2 className="text-7xl font-black italic uppercase">{Math.floor(userData.balance)}</h2><span className="text-xl font-black opacity-80 uppercase">EMD</span></div><div className="bg-white/20 backdrop-blur-md px-6 py-3 rounded-2xl inline-flex items-center space-x-3 shadow-inner mx-auto"><Landmark size={18} /><span className="text-[10px] font-black uppercase tracking-widest">Valued at ₹{(userData.balance * 0.02).toFixed(2)} INR</span></div><Database className="absolute -bottom-10 -right-10 opacity-10" size={200} /></div></div>
+              
+              {/* EMD TOP-UPS VIA UPI */}
+              <div className="space-y-3">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Top-Up Emeralds via UPI</p>
+                <div className="grid grid-cols-3 gap-3">
+                  {TOP_UP_PACKS.map((pack) => (
+                    <button 
+                      key={pack.emd} 
+                      onClick={() => triggerTopupPayment(pack)}
+                      className="p-3 bg-white border border-gray-100 hover:border-blue-300 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm active:scale-95 transition-all"
+                    >
+                      <span className="text-xs font-black text-blue-600">+{pack.emd} EMD</span>
+                      <span className="text-[9px] text-gray-400 font-extrabold mt-1">₹{pack.inr}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {/* Transactions Ledger history */}
+              <div className="space-y-3">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Transaction Ledger</p>
+                {userData.transactions && userData.transactions.length > 0 ? (
+                  <div className="space-y-3">
+                    {userData.transactions.map((tx) => (
+                      <div key={tx.id} className="p-4 bg-white border border-gray-100 rounded-3xl flex items-center justify-between">
+                        <div>
+                          <p className="text-xs font-black uppercase text-gray-800">{tx.type === 'Top-up Credit' ? 'Deposit Top-up' : `UPI Redeem (To: ${tx.upi})`}</p>
+                          <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">{new Date(tx.timestamp).toLocaleDateString()} at {new Date(tx.timestamp).toLocaleTimeString()}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className={`text-xs font-black ${tx.type === 'Top-up Credit' ? 'text-green-500' : 'text-red-500'}`}>
+                            {tx.type === 'Top-up Credit' ? '+' : '-'}{tx.amount} EMD
+                          </p>
+                          <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full ${tx.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{tx.status}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-8 border-2 border-dashed border-gray-100 rounded-3xl text-center text-gray-400 text-[10px] font-bold uppercase tracking-widest">No transaction ledger recorded.</div>
+                )}
+              </div>
+              <button onClick={() => setModals(p => ({...p, wallet: false, withdraw: true}))} className="w-full bg-black text-white py-6 rounded-[32px] flex items-center justify-center space-x-3 font-black text-[11px] uppercase tracking-[0.2em] shadow-2xl active:scale-95 transition-all shadow-black/20"><ArrowUpRight size={20}/> <span>Withdraw Emeralds</span></button>
+           </div>
+        </ModalWrapper>
+      )}
+      {modals.spin && (
+        <ModalWrapper title="Lucky Wheel">
+           <div className="p-8 flex flex-col space-y-12 h-full">
+              <div className="relative pl-8"><div className="absolute left-0 top-1 bottom-1 w-1.5 bg-blue-500 rounded-full shadow-sm shadow-blue-200"></div><h2 className="text-4xl font-black leading-[0.9] text-gray-900 italic tracking-tighter uppercase">Test your<br/><span className="text-blue-500 uppercase">Luck.</span></h2></div>
+              <div className="flex-1 flex items-center justify-center relative scale-90">
+                 <div className="relative w-[320px] h-[320px] flex items-center justify-center">
+                    <div className="w-full h-full rounded-full relative overflow-hidden border-[10px] border-white shadow-[0_30px_80px_rgba(0,0,0,0.1)] transition-transform duration-[4000ms] cubic-bezier(0.1, 0, 0, 1)" style={{ transform: `rotate(${spinRotation}deg)` }}>
+                       {WHEEL_PRIZES.map((prize, i) => (
+                         <div key={i} className={`absolute top-0 right-0 w-1/2 h-1/2 origin-bottom-left flex items-start justify-center pt-8 ${prize.color}`} style={{ transform: `rotate(${i * (360 / WHEEL_PRIZES.length)}deg) skewY(-45deg)` }}><div className="transform skewY(45deg) rotate-[-22.5deg] text-center flex flex-col items-center"><span className="text-white text-[8px] font-black uppercase tracking-tighter mb-1 leading-none whitespace-nowrap drop-shadow-sm">{prize.label}</span><span className="text-white text-xl">{prize.icon}</span></div></div>
+                       ))}
+                       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 bg-white rounded-full shadow-2xl flex items-center justify-center border-4 border-white z-10"><Edit3 className="text-blue-500 rotate-45" size={24} /></div>
+                    </div>
+                    <div className="absolute right-[-12px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-[14px] border-t-transparent border-b-[14px] border-b-transparent border-r-[26px] border-r-black z-20"></div>
+                 </div>
+              </div>
+              <div className="text-center space-y-6 pb-10"><div className="space-y-1"><p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">WHEEL READY</p><p className="text-2xl font-black tracking-widest text-gray-800">SPIN TO WIN EMD</p></div><button onClick={onSpin} disabled={isSpinning} className={`w-full py-6 rounded-[32px] font-black text-xs uppercase tracking-[0.4em] shadow-sm border border-gray-50 active:scale-95 transition-all ${isSpinning ? 'bg-gray-50 text-gray-300' : 'bg-white text-gray-700'}`}>{isSpinning ? 'SPINNING...' : 'SPIN FOR FREE'}</button></div>
+           </div>
+        </ModalWrapper>
+      )}
+      {modals.supportGroup && (
+        <ModalWrapper title="WhatsApp Hub">
+           <div className="p-8 text-center space-y-8 h-full flex flex-col justify-center animate-in zoom-in">
+              <div className="w-24 h-24 bg-green-50 rounded-3xl flex items-center justify-center text-green-500 mx-auto animate-bounce shadow-xl shadow-green-50"><MessageCircle size={48}/></div>
+              <h2 className="text-4xl font-black italic tracking-tighter text-gray-900 uppercase">Join Community</h2>
+              <p className="text-gray-400 text-[10px] font-black uppercase px-10 leading-relaxed tracking-widest">Connect with our official Hub for WBJEE/GATE/NEET aspirants.</p>
+              <div className="space-y-4 pt-6"><div onClick={() => window.open(WHATSAPP_COMMUNITY_LINK, '_blank')} className="p-6 bg-white border border-gray-100 rounded-3xl flex items-center justify-between cursor-pointer active:scale-95 transition-all shadow-sm"><div className="flex items-center space-x-4"><div className="w-10 h-10 rounded-2xl bg-green-500 flex items-center justify-center text-white shadow-lg shadow-green-100"><Users size={20}/></div><span className="text-sm font-black uppercase tracking-tight">Official Hub</span></div><span className="text-green-500 font-black text-[10px] uppercase tracking-widest">JOIN</span></div></div>
+              <div className="flex-1 flex flex-col justify-end"><button onClick={() => window.open(WHATSAPP_COMMUNITY_LINK, '_blank')} className="w-full py-6 bg-green-600 text-white rounded-[32px] font-black text-[11px] uppercase tracking-[0.2em] shadow-xl">LAUNCH HUB</button></div>
+           </div>
+        </ModalWrapper>
+      )}
+      {/* Logic Modals (Exams/Colleges) */}
+      {modals.manageColleges && <ModalWrapper title="Academy Hub"><div className="p-6 space-y-4"><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">Select Campuses</p><div className="flex flex-wrap gap-2 justify-center">{COLLEGES_LIST.map(c => { const active = userData.colleges.includes(c); return <button key={c} onClick={async () => { const updated = active ? userData.colleges.filter(i => i !== c) : [...userData.colleges, c]; updateProfile({ colleges: updated }); }} className={`px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${active ? 'bg-blue-600 text-white shadow-xl scale-105' : 'bg-white border border-gray-100 text-gray-400'}`}>{c}</button> })}</div><button onClick={close} className="w-full py-5 bg-black text-white rounded-[24px] font-black text-[10px] uppercase tracking-widest mt-10 shadow-xl">Update Academy</button></div></ModalWrapper>}
+      {modals.manageExams && <ModalWrapper title="Target Hub"><div className="p-6 space-y-4"><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">Active Goals</p><div className="flex flex-wrap gap-2 justify-center">{EXAMS_LIST.map(e => { const active = userData.exams.includes(e); return <button key={e} onClick={async () => { const updated = active ? userData.exams.filter(i => i !== e) : [...userData.exams, e]; updateProfile({ exams: updated }); }} className={`px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${active ? 'bg-blue-600 text-white shadow-xl scale-105' : 'bg-white border border-gray-100 text-gray-400'}`}>{e}</button> })}</div><button onClick={close} className="w-full py-5 bg-black text-white rounded-[24px] font-black text-[10px] uppercase tracking-widest mt-10 shadow-xl">Done</button></div></ModalWrapper>}
+      {/* Basic Utility */}
+      {modals.withdraw && <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-[2000] flex items-center justify-center p-6"><form onSubmit={handleWithdrawSubmit} className="bg-white w-full max-w-sm rounded-[40px] p-8 space-y-6 animate-in zoom-in shadow-2xl"><div className="flex justify-between items-center"><h3 className="text-2xl font-black uppercase italic tracking-tighter">Withdraw EMD</h3><button type="button" onClick={close} className="text-gray-400"><X /></button></div><div className="space-y-4"><div className="p-5 bg-gray-50 rounded-3xl border border-gray-100"><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Enter UPI ID</p><input name="upi" required placeholder="username@upi" className="bg-transparent w-full outline-none font-bold text-lg tracking-tight uppercase" /></div><div className="p-5 bg-gray-50 rounded-3xl border border-gray-100"><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Emeralds (EMD) to Burn</p><input name="amount" type="number" required placeholder="Min 500 EMD" className="bg-transparent w-full outline-none font-black text-3xl text-blue-600 tracking-tight" /><p className="text-[10px] text-gray-400 font-bold mt-2 uppercase tracking-tighter">Balance: {Math.floor(userData.balance)} EMD</p></div></div><button className="w-full py-5 bg-black text-white rounded-3xl font-black text-xs uppercase tracking-[0.2em] shadow-2xl">Confirm Withdrawal</button></form></div>}
+      {modals.ad && <div className="fixed inset-0 bg-black z-[3000] flex flex-col items-center justify-center p-10 text-center animate-in fade-in"><div className="text-white text-8xl font-black mb-10 animate-pulse italic">{adTimer}S</div><div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center text-blue-400 mb-6"><PlayCircle size={40} /></div><p className="text-gray-400 font-black text-[10px] uppercase tracking-[0.3em]">Loading Video Ad Rewards...</p><div className="mt-16 w-full h-1 bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-blue-600 transition-all duration-1000" style={{ width: `${((10-adTimer)/10)*100}%` }}></div></div></div>}
+      {modals.search && <ModalWrapper title="Search"><div className="p-6"><div className="bg-gray-100 p-4 rounded-2xl flex items-center space-x-3 mb-6"><Search size={18} className="text-gray-400" /><input autoFocus placeholder="Find material..." className="w-full bg-transparent outline-none font-bold text-sm uppercase tracking-widest" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} /></div><div className="space-y-4">{notes.filter(n => n.title.toLowerCase().includes(searchQuery.toLowerCase())).map(n => <div key={n.id} onClick={() => { close(); handleSelectNote(n); }} className="p-4 bg-white border border-gray-100 rounded-3xl flex items-center space-x-4 active:scale-95 transition-transform"><div className="w-10 h-10 rounded-xl overflow-hidden bg-gray-50"><img src={n.image} className="w-full h-full object-cover" /></div><p className="font-black text-xs uppercase tracking-tighter truncate">{n.title}</p></div>)}</div></div></ModalWrapper>}
+      
+      {modals.viewNote && (
+        <div className="fixed inset-0 bg-white z-[1500] flex flex-col animate-in fade-in zoom-in font-sans">
+          <header className="p-4 flex items-center justify-between border-b border-gray-50">
+            <button onClick={close} className="p-2"><X size={24} /></button>
+            <h3 className="font-black text-[10px] uppercase tracking-[0.4em]">{modals.viewNote.exam}</h3>
+            <button onClick={() => handleCopyNoteLink(modals.viewNote)} className="p-2 text-blue-600"><Share2 size={22} /></button>
+          </header>
+          <div className="flex-1 overflow-y-auto p-6 bg-[#F9FBFF]">
+            <div className="bg-white p-6 md:p-10 rounded-[48px] shadow-sm max-w-2xl mx-auto space-y-8 animate-in slide-in-from-bottom duration-500">
+              <h2 className="text-3xl md:text-4xl font-extrabold leading-tight tracking-tighter uppercase Outfit">{modals.viewNote.title}</h2>
+              <div className="aspect-video bg-gray-100 rounded-[32px] overflow-hidden border border-gray-100 shadow-xl shadow-black/5">
+                <img src={modals.viewNote.image} className="w-full h-full object-cover" />
+              </div>
+              <div className="p-4 bg-blue-50 border border-blue-100/50 rounded-2xl flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${modals.viewNote.authorName}`} className="w-10 h-10 rounded-full bg-white" />
+                  <div>
+                    <p className="text-xs font-bold text-gray-800">Uploaded by {modals.viewNote.authorName}</p>
+                    <p className="text-[9px] text-gray-400 font-extrabold uppercase">Member Scholar</p>
+                  </div>
+                </div>
+                {modals.viewNote.authorId !== user.uid && (
+                  <button 
+                    onClick={() => toggleFollowUser(modals.viewNote.authorId, modals.viewNote.authorName)}
+                    className="px-4 py-2 bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
+                  >
+                    {userData?.followingUids?.includes(modals.viewNote.authorId) ? 'Following' : 'Follow'}
+                  </button>
+                )}
+              </div>
+              <div className="space-y-4 text-gray-500 font-medium text-sm leading-relaxed">
+                <p className="font-extrabold text-[11px] text-gray-400 uppercase tracking-widest">Verified Notes & Concept Breakdowns</p>
+                <hr className="border-gray-50" />
+                <p>This note covers critical syllabus topics with quick breakdowns, diagrams, and memory aids. Perfect for exam revisions.</p>
+                <div className="flex justify-center pt-4">
+                  <button 
+                    onClick={() => toggleSaveOffline(modals.viewNote.id)}
+                    className={`px-6 py-3 rounded-2xl font-bold text-[10px] uppercase tracking-widest border transition-all flex items-center space-x-2 ${userData?.library?.includes(modals.viewNote.id) ? 'bg-green-50 border-green-200 text-green-700' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'}`}
+                  >
+                    <DownloadCloud size={14} />
+                    <span>{userData?.library?.includes(modals.viewNote.id) ? 'Saved Offline' : 'Cache Offline'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <footer className="p-6 bg-white border-t border-gray-50 flex items-center justify-between max-w-2xl w-full mx-auto">
+            <div className="flex items-center space-x-4">
+              <Eye size={20} className="text-gray-300" />
+              <span className="font-black text-xl italic text-gray-800">{modals.viewNote.views}</span>
+            </div>
+            <button onClick={() => notify("Downloading material PDF...")} className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-3xl font-black text-[10px] uppercase tracking-widest shadow-xl">Download PDF</button>
+          </footer>
+        </div>
+      )}
+      
+      {/* Activity Modals */}
+      {modals.notebook && (
+        <ModalWrapper title="Formula Notebook">
+          <div className="p-6 space-y-8 pb-20 max-w-2xl mx-auto">
+            <div className="bg-white border border-gray-100 rounded-[32px] p-6 shadow-sm">
+              <h4 className="text-xs font-black uppercase text-gray-400 tracking-wider mb-4">Add Cheat Formula</h4>
+              <form onSubmit={handleAddFormula} className="space-y-4">
+                <input name="title" required placeholder="Formula Name (e.g. Euler's Identity)" className="w-full p-4 bg-gray-50 rounded-2xl border-0 outline-none font-bold text-sm" />
+                <div className="flex space-x-2">
+                  <select name="category" className="flex-1 p-4 bg-gray-50 rounded-2xl border-0 outline-none font-bold text-sm uppercase">
+                    <option value="Mathematics">Mathematics</option>
+                    <option value="Physics">Physics</option>
+                    <option value="Chemistry">Chemistry</option>
+                    <option value="Computer Science">Computer Science</option>
+                  </select>
+                </div>
+                <textarea name="content" required placeholder="Formula (LaTeX/Plain, e.g., e^(i*pi) + 1 = 0)" rows={2} className="w-full p-4 bg-gray-50 rounded-2xl border-0 outline-none font-bold text-sm" />
+                <button className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-xs uppercase tracking-widest shadow-lg">Save to Notebook</button>
+              </form>
+            </div>
+            <div className="space-y-4">
+              <h4 className="text-xs font-black uppercase text-gray-400 tracking-wider">Saved Formulas</h4>
+              {userData.notebook && userData.notebook.length > 0 ? (
+                <div className="space-y-4">
+                  {userData.notebook.map(f => (
+                    <div key={f.id} className="bg-white border border-gray-100 rounded-[32px] p-5 shadow-sm relative group">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="bg-blue-100 text-blue-600 text-[8px] font-black uppercase px-2 py-0.5 rounded-full tracking-wide">{f.category}</span>
+                        <button onClick={() => handleDeleteFormula(f.id)} className="text-gray-300 hover:text-red-500 transition-colors"><Trash size={16} /></button>
+                      </div>
+                      <h3 className="font-extrabold text-sm text-gray-900 mb-2 uppercase">{f.title}</h3>
+                      <div className="p-4 bg-gray-50 rounded-2xl font-mono text-xs text-blue-600 select-all border border-gray-100 overflow-x-auto">
+                        {f.content}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-16 border-2 border-dashed border-gray-100 rounded-[32px] text-center opacity-40">
+                  <Edit3 className="mx-auto mb-2 text-gray-300" size={32}/>
+                  <p className="font-black text-[10px] uppercase tracking-widest">No formulas saved yet.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </ModalWrapper>
+      )}
+     {modals.planner && (
+        <ModalWrapper title="Study Planner">
+          <div className="p-6 space-y-8 pb-20 max-w-2xl mx-auto">
+            {(() => {
+              const planner = userData.planner || [];
+              const total = planner.length;
+              const completed = planner.filter(t => t.status === 'Completed').length;
+              const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+              return (
+                <div className="bg-gradient-to-br from-[#7E57C2] to-[#673AB7] p-6 rounded-[32px] text-white shadow-lg flex items-center justify-between">
+                  <div>
+                    <h4 className="text-[10px] font-black uppercase tracking-widest opacity-80">Daily Target Completion</h4>
+                    <h2 className="text-3xl font-extrabold mt-1">{pct}% Complete</h2>
+                    <p className="text-[9px] opacity-70 mt-1 uppercase font-bold">{completed} of {total} targets completed</p>
+                  </div>
+                  <div className="relative w-16 h-16 bg-white/20 rounded-full flex items-center justify-center font-black text-xs">
+                    {pct}%
+                  </div>
+                </div>
+              );
+            })()}
+            <div className="bg-white border border-gray-100 rounded-[32px] p-6 shadow-sm">
+              <h4 className="text-xs font-black uppercase text-gray-400 tracking-wider mb-4">New Study Target</h4>
+              <form onSubmit={handleAddTask} className="space-y-4">
+                <input name="title" required placeholder="Task Description (e.g. Complete Chemistry mock test)" className="w-full p-4 bg-gray-50 rounded-2xl border-0 outline-none font-bold text-sm" />
+                <div className="flex space-x-2">
+                  <select name="category" className="flex-1 p-4 bg-gray-50 rounded-2xl border-0 outline-none font-bold text-sm uppercase">
+                    <option value="Syllabus">Syllabus</option>
+                    <option value="Revision">Revision</option>
+                    <option value="Mock Test">Mock Test</option>
+                    <option value="Homework">Homework</option>
+                  </select>
+                  <input type="date" name="targetDate" required className="p-4 bg-gray-50 rounded-2xl border-0 outline-none font-bold text-sm" />
+                </div>
+                <button className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-xs uppercase tracking-widest shadow-lg">Add Target</button>
+              </form>
+            </div>
+            <div className="space-y-4">
+              <h4 className="text-xs font-black uppercase text-gray-400 tracking-wider">Planner Board</h4>
+              {userData.planner && userData.planner.length > 0 ? (
+                <div className="space-y-3">
+                  {userData.planner.map(t => (
+                    <div key={t.id} className="bg-white border border-gray-100 rounded-[24px] p-4 shadow-sm flex items-center justify-between">
+                      <div className="flex items-start space-x-4">
+                        <button 
+                          onClick={() => toggleTaskStatus(t.id)} 
+                          className={`mt-1 p-1.5 rounded-lg border transition-all ${t.status === 'Completed' ? 'bg-green-100 border-green-300 text-green-700' : t.status === 'In Progress' ? 'bg-yellow-100 border-yellow-300 text-yellow-700' : 'bg-gray-50 border-gray-200 text-gray-400'}`}
+                        >
+                          {t.status === 'Completed' ? <Check size={14} /> : <Clock size={14} />}
+                        </button>
+                        <div>
+                          <p className={`text-sm font-extrabold uppercase ${t.status === 'Completed' ? 'line-through text-gray-300' : 'text-gray-900'}`}>{t.title}</p>
+                          <div className="flex items-center space-x-2 mt-1">
+                            <span className="bg-gray-100 text-gray-600 text-[8px] font-black uppercase px-2 py-0.5 rounded-full">{t.category}</span>
+                            <span className="text-[9px] text-gray-400 font-bold uppercase">Due: {t.targetDate}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <button onClick={() => handleDeleteTask(t.id)} className="text-gray-300 hover:text-red-500 p-2"><Trash size={16} /></button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-16 border-2 border-dashed border-gray-100 rounded-[32px] text-center opacity-40">
+                  <RotateCw className="mx-auto mb-2 text-gray-300 animate-spin" style={{ animationDuration: '4s' }} size={32}/>
+                  <p className="font-black text-[10px] uppercase tracking-widest">No targets scheduled.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </ModalWrapper>
+      )}
+      {modals.library && (
+        <ModalWrapper title="Offline Cache Library">
+          <div className="p-6 space-y-6 pb-20 max-w-2xl mx-auto">
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Downloaded study materials stored locally</p>
+            {savedNotes.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {savedNotes.map(note => (
+                  <div key={note.id} className="relative">
+                    <NoteCard note={note} onView={handleSelectNote} userData={userData} />
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); toggleSaveOffline(note.id); }}
+                      className="absolute top-6 right-6 p-2 bg-red-500 text-white rounded-full shadow-lg hover:scale-105 transition-transform"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-24 border-2 border-dashed border-gray-100 rounded-[40px] text-center opacity-40">
+                <DownloadCloud className="mx-auto mb-3 text-gray-300" size={48} />
+                <p className="font-black text-[11px] uppercase tracking-widest">Library Empty</p>
+                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mt-1">Cache notes from the feed to access them offline.</p>
+              </div>
+            )}
+          </div>
+        </ModalWrapper>
+      )}
+      {modals.notifications && (
+        <ModalWrapper title="Scholar Inbox">
+          <div className="p-6 space-y-4 pb-20 max-w-xl mx-auto">
+            {userData.notifications && userData.notifications.length > 0 ? (
+              <div className="space-y-4">
+                {userData.notifications.map((notif) => (
+                  <div 
+                    key={notif.id} 
+                    onClick={() => {
+                      const updated = userData.notifications.map(n => n.id === notif.id ? { ...n, read: true } : n);
+                      updateProfile({ notifications: updated });
+                    }}
+                    className={`p-5 rounded-[28px] border transition-all cursor-pointer relative ${notif.read ? 'bg-white border-gray-100 opacity-60' : 'bg-blue-50/50 border-blue-100 shadow-sm'}`}
+                  >
+                    {!notif.read && <div className="absolute top-5 right-5 w-2.5 h-2.5 bg-blue-500 rounded-full"></div>}
+                    <h4 className="font-extrabold text-sm text-gray-900 uppercase pr-4">{notif.title}</h4>
+                    <p className="text-xs text-gray-500 font-medium mt-1 leading-relaxed">{notif.content}</p>
+                    <div className="flex items-center justify-between mt-4">
+                      <span className="text-[8px] text-gray-400 font-black uppercase tracking-widest">{new Date(notif.timestamp).toLocaleDateString()}</span>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const updated = userData.notifications.filter(n => n.id !== notif.id);
+                          updateProfile({ notifications: updated });
+                          notify("Notification cleared");
+                        }} 
+                        className="text-gray-300 hover:text-red-500 p-1"
+                      >
+                        <Trash size={14} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-24 text-center opacity-30 font-black tracking-widest text-[10px] uppercase">All caught up!</div>
+            )}
+          </div>
+        </ModalWrapper>
+      )}
+      {modals.referral && (
+        <div className="fixed inset-0 bg-black/40 z-[1500] flex items-center justify-center p-6">
+          <div className="bg-white rounded-[40px] p-8 max-w-sm w-full text-center space-y-6 animate-in zoom-in border border-gray-50 shadow-2xl">
+            <Users size={36} className="mx-auto text-blue-600"/>
+            <h4 className="font-extrabold text-lg italic uppercase">Invite Code: @{userData.username}</h4>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-relaxed">
+              Share your invite username with friends. Both of you receive 25 EMD instantly when they redeem it!
+            </p>
+            <button onClick={() => handleCopy(userData.username)} className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-3xl font-black text-[10px] uppercase tracking-widest shadow-md">Copy Referral Code</button>
+            
+            <hr className="border-gray-100" />
+            
+            <form onSubmit={handleRedeemReferral} className="space-y-3 text-left">
+              <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest px-1">Redeem Friend's Code</label>
+              <div className="flex space-x-2">
+                <input name="refCode" required placeholder="friend_username" className="flex-1 px-4 py-3 bg-gray-50 rounded-2xl outline-none font-bold text-xs uppercase" />
+                <button className="px-5 bg-black text-white rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">Claim</button>
+              </div>
+              {userData.redeemedReferralCode && (
+                <p className="text-[9px] text-green-500 font-bold uppercase tracking-wider mt-1 px-1">Redeemed: @{userData.redeemedReferralCode}</p>
+              )}
+            </form>
+            <button onClick={close} className="text-gray-300 hover:text-gray-400 font-bold uppercase text-[10px] pt-2">Close</button>
+          </div>
+        </div>
+      )}
+      {modals.upload && <div className="fixed inset-0 bg-black/40 z-[2000] flex items-end"><div className="bg-white w-full rounded-t-[40px] p-8 pb-10 max-w-lg mx-auto animate-in slide-in-from-bottom duration-500"><div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-8"></div><form onSubmit={handleUpload} className="space-y-4"><div className="text-center mb-6"><h2 className="text-2xl font-black italic uppercase tracking-tighter">Share Material</h2><p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">Publish notes or courses</p></div><input name="title" required placeholder="Material Title (e.g. Chemistry Formula Sheet)" className="w-full p-4 bg-gray-50 rounded-3xl outline-none font-bold text-sm uppercase" /><select name="exam" className="w-full p-4 bg-gray-50 rounded-3xl font-black uppercase tracking-widest">{EXAMS_LIST.map(e => <option key={e}>{e}</option>)}</select><button className="w-full py-5 bg-blue-600 text-white rounded-[24px] font-black text-sm shadow-xl mt-4 uppercase">Publish Now</button><button type="button" onClick={close} className="w-full py-2 text-gray-300 font-bold uppercase tracking-widest text-[10px]">Cancel</button></form></div></div>}
+      {modals.editProfile && <ModalWrapper title="Design"><div className="p-6 space-y-10 overflow-y-auto no-scrollbar pb-10 text-center max-w-lg mx-auto"><div className="w-32 h-32 rounded-full border-4 border-blue-600 mx-auto overflow-hidden bg-white shadow-2xl"><img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.avatarSeed}`} className="w-full h-full" /></div><button onClick={async () => updateProfile({ avatarSeed: Math.random().toString(36).substring(7) })} className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-all">New Avatar</button><div className="grid grid-cols-2 gap-4 text-left">{[{ name: 'Sky High', val: 'from-blue-600 via-blue-400 to-blue-50' }, { name: 'Sunset', val: 'from-pink-500 via-orange-400 to-yellow-50' }, { name: 'Emerald', val: 'from-teal-600 via-emerald-400 to-green-50' }, { name: 'Midnight', val: 'from-gray-900 via-blue-900 to-indigo-800' }].map(g => (<div key={g.val} onClick={async () => updateProfile({ profileColor: g.val })} className={`p-4 rounded-3xl bg-gradient-to-br ${g.val} h-24 flex items-end border-4 transition-all cursor-pointer ${userData.profileColor === g.val ? 'border-blue-600 scale-105 shadow-xl' : 'border-white'}`}><span className="text-[8px] font-black text-white bg-black/20 px-2 py-0.5 rounded-full uppercase">{g.name}</span></div>))}</div><button onClick={close} className="w-full py-5 bg-black text-white rounded-3xl font-black text-xs uppercase tracking-widest shadow-2xl mt-4">Done</button></div></ModalWrapper>}
+      {/* Interactive Quiz System Modal */}
+      {activeQuiz && (
+        <div className="fixed inset-0 bg-white z-[1600] flex flex-col animate-in fade-in duration-300 font-sans">
+          <header className="p-4 flex items-center justify-between border-b border-gray-50">
+            <button onClick={resetQuizState} className="p-2"><X size={24} /></button>
+            <h3 className="font-black text-[10px] uppercase tracking-[0.4em]">QUIZ CHALLENGE</h3>
+            <div className="w-10"></div>
+          </header>
+          
+          <div className="flex-1 overflow-y-auto p-6 bg-[#F9FBFF]">
+            <div className="bg-white p-6 md:p-10 rounded-[40px] shadow-sm max-w-xl mx-auto space-y-6">
+              {!quizFinished ? (
+                <>
+                  <div className="flex justify-between items-center text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                    <span>Question {quizQuestionIndex + 1} of {activeQuiz.questions.length}</span>
+                    <span className="text-orange-500">+{activeQuiz.reward} EMD reward</span>
+                  </div>
+                  
+                  {/* Progress bar */}
+                  <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-blue-500 transition-all duration-300" style={{ width: `${((quizQuestionIndex) / activeQuiz.questions.length) * 100}%` }}></div>
+                  </div>
+                  <h3 className="text-xl font-extrabold text-gray-900 leading-snug uppercase tracking-tight">
+                    {activeQuiz.questions[quizQuestionIndex].question}
+                  </h3>
+                  <div className="space-y-3 pt-4">
+                    {activeQuiz.questions[quizQuestionIndex].options.map((opt, oIdx) => (
+                      <button
+                        key={oIdx}
+                        onClick={() => setQuizSelectedOption(oIdx)}
+                        className={`w-full p-4 rounded-2xl text-left text-xs font-bold uppercase transition-all border ${quizSelectedOption === oIdx ? 'bg-blue-50 border-blue-500 text-blue-700 shadow-md' : 'bg-white border-gray-100 hover:bg-gray-50 text-gray-700'}`}
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-10 space-y-6">
+                  <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center text-green-500 mx-auto">
+                    <Trophy size={40} />
+                  </div>
+                  <h3 className="text-2xl font-black uppercase italic">Quiz Results</h3>
+                  <p className="text-sm font-bold text-gray-600 uppercase">
+                    Your Score: {quizScore} / {activeQuiz.questions.length} Correct
+                  </p>
+                  
+                  {quizScore === activeQuiz.questions.length ? (
+                    <p className="text-[10px] text-green-600 font-extrabold uppercase tracking-widest bg-green-50 px-4 py-2 rounded-xl inline-block">
+                      Perfect Score! Claimed {activeQuiz.reward} EMD bonus! 🎉
+                    </p>
+                  ) : (
+                    <p className="text-[10px] text-orange-600 font-extrabold uppercase tracking-widest bg-orange-50 px-4 py-2 rounded-xl inline-block">
+                      Need 100% to earn EMD reward. Try again!
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+          <footer className="p-6 bg-white border-t border-gray-50 flex items-center justify-center max-w-xl w-full mx-auto">
+            {!quizFinished ? (
+              <button
+                onClick={handleQuizAnswerSubmit}
+                disabled={quizSelectedOption === null}
+                className={`px-12 py-4 rounded-3xl font-black text-[10px] uppercase tracking-widest shadow-xl flex items-center space-x-2 transition-all ${quizSelectedOption === null ? 'bg-gray-100 text-gray-300 cursor-default' : 'bg-blue-600 text-white shadow-blue-200 hover:bg-blue-700 active:scale-95'}`}
+              >
+                <span>Submit Answer</span>
+                <Send size={12} />
+              </button>
+            ) : (
+              <button 
+                onClick={resetQuizState}
+                className="px-12 py-4 bg-black text-white rounded-3xl font-black text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-all"
+              >
+                Done
+              </button>
+            )}
+          </footer>
+        </div>
+      )}
+      {/* PREMIUM CONTENT PURCHASE TRIGGER MODAL */}
+      {modals.purchaseContent && purchaseItem && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[1800] flex items-center justify-center p-6">
+          <div className="bg-white w-full max-w-sm rounded-[40px] p-8 space-y-6 animate-in zoom-in shadow-2xl relative text-center border border-gray-100">
+            <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-2xl flex items-center justify-center text-white mx-auto shadow-lg">
+              <Crown size={32} />
+            </div>
+            <div>
+              <span className="text-[9px] text-amber-500 font-black uppercase tracking-widest">Unlock Premium Material</span>
+              <h3 className="text-xl font-black uppercase mt-1 leading-snug">{purchaseItem.title}</h3>
+              <p className="text-[10px] text-gray-400 font-bold uppercase mt-1">{purchaseItem.provider || purchaseItem.exam} Special</p>
+            </div>
+            
+            <div className="p-4 bg-gray-50 rounded-2xl space-y-2 text-left">
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Purchase Options</p>
+              <div className="flex justify-between text-xs font-black uppercase">
+                <span>UPI Payment:</span>
+                <span className="text-gray-900">₹{purchaseItem.priceInr}</span>
+              </div>
+              <div className="flex justify-between text-xs font-black uppercase">
+                <span>EMD Wallet:</span>
+                <span className="text-amber-500">{purchaseItem.priceEmd} EMD</span>
+              </div>
+              <div className="pt-2 text-[9px] text-gray-400 font-bold uppercase tracking-tighter border-t border-gray-200">
+                Your Balance: {Math.floor(userData?.balance || 0)} EMD
+              </div>
+            </div>
+            <div className="space-y-3 pt-2">
+              <button 
+                onClick={() => triggerContentPayment(purchaseItem)}
+                className="w-full py-4 bg-black hover:bg-gray-900 text-white rounded-2xl font-bold text-xs uppercase tracking-widest flex items-center justify-center space-x-2 active:scale-95 transition-all shadow-md"
+              >
+                <QrCode size={14} />
+                <span>Pay ₹{purchaseItem.priceInr} via UPI QR</span>
+              </button>
+              <button 
+                onClick={() => handlePurchaseWithEmd(purchaseItem)}
+                className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-xs uppercase tracking-widest flex items-center justify-center space-x-2 active:scale-95 transition-all shadow-md shadow-blue-100"
+              >
+                <CardIcon size={14} />
+                <span>Redeem {purchaseItem.priceEmd} EMD</span>
+              </button>
+            </div>
+            <button 
+              onClick={() => { setPurchaseItem(null); setModals(p => ({ ...p, purchaseContent: false })); }}
+              className="text-gray-300 hover:text-gray-400 font-bold uppercase text-[9px] tracking-wider block mx-auto pt-2"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+      {/* DYNAMIC UPI QR SCANNER MODAL */}
+      {modals.upiPayment && upiPaymentDetail && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[1900] flex items-center justify-center p-6">
+          <div className="bg-white w-full max-w-sm rounded-[40px] p-8 space-y-6 animate-in zoom-in shadow-2xl relative border border-gray-100">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xl font-black uppercase italic tracking-tighter">UPI Gateway</h3>
+              <button 
+                onClick={() => setModals(p => ({ ...p, upiPayment: false }))}
+                className="text-gray-400"
+              >
+                <X />
+              </button>
+            </div>
 
 
 
