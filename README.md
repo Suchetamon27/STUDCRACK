@@ -102,4 +102,6 @@ We welcome contributions!
 
 ### 📊 Project 
 Made with ❤️ for students worldwide ⭐ Star us on GitHub — it motivates us a lot!
+
+
 © STUDCRACK Tech 2026. All rights reserved.
