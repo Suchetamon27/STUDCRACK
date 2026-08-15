@@ -1,6 +1,6 @@
 # STUDCRACK🎓
 
-Studcrack is a modern, responsive, and gamified study platform designed for board and entrance exam aspirants (e.g. GATE, WBJEE, JEE Mains & Adv, NEET). It helps students share study materials, earn rewards (Emeralds - EMD), manage their preparation schedule, and unlock premium notes and courses.
+Studcrack is a modern, responsive, and gamified study platform designed for board and entrance exam aspirants (e.g. GATE, WBJEE, JEE Mains & Adv, NEET). It helps students share study materials, earn rewards (Emeralds - EMD), manage their preparation schedule, and unlock premium notes and courses. 
 ---
 ## 🌟 Key Features
 - **Responsive Viewport Design**: A fully unified adaptive layout. It presents a sleek navigation Sidebar on desktop viewports and an elegant bottom navigation bar on mobile viewports.
